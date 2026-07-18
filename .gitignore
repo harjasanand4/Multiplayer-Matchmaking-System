@@ -1,0 +1,7 @@
+#compiled output
+/out/
+
+#idea project files
+/.idea/
+*.iml
+ACCESS-TOKEN.p12

@@ -1,0 +1,38 @@
+Use Case: Place [X] / Place [O]
+Primary Actor: Player [X] / Player [O]
+Goal in context: Place symbol onto board
+Preconditions: 
+- It is the current player’s turn
+- Placement is valid
+Trigger: Player is ready to place symbol
+Scenario: 
+- Player selects valid location to place symbol
+- Symbol is placed onto the board
+- Post conditions: Symbol is placed onto the board
+Exceptions: 
+- Game is over
+Priority: High
+Frequency of use: Several times per game
+Channel to actor: GUI
+Secondary actors: N/A
+Channel to secondary actors: N/A
+Open issues: N/A
+
+Use Case: Track Player Order
+Primary Actor: N/A
+Goal in context: Track which player goes first
+Preconditions: 
+- Game has started
+Trigger: Constant tracking
+Scenario: 
+- Check to see if player has moved
+- Once player has moved, switch tracking to other player
+Post conditions: Current player’s turn is shown
+Exceptions: 
+- At initial match start, pick random player
+Priority: High
+Frequency of use: Constant during the game
+Channel to actor: N/A
+Secondary actors: N/A
+Channel to secondary actors: N/A
+Open issues: N/A

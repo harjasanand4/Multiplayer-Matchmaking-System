@@ -1,0 +1,23 @@
+[
+  {
+    "player1ID": "1",
+    "player1": "Himanshu",
+    "player2": "Bella",
+    "result": "WIN",
+    "gameType": "TICTACTOE"
+  },
+  {
+    "player1ID": "1",
+    "player1": "Himanshu",
+    "player2": "Connor",
+    "result": "LOSE",
+    "gameType": "CHECKERS"
+  },
+  {
+    "player1ID": "1",
+    "player1": "Himanshu",
+    "player2": "Danika",
+    "result": "WIN",
+    "gameType": "CHECKERS"
+  }
+]

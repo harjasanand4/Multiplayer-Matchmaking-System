@@ -1,0 +1,472 @@
+Subject: [PATCH] Uncommitted changes before Update at 2025-04-07 10:15 p.m. [Changes]
+---
+Index: src/com/game/gui/GameMenu_2.java
+===================================================================
+diff --git a/src/com/game/gui/GameMenu_2.java b/src/com/game/gui/GameMenu_2.java
+--- a/src/com/game/gui/GameMenu_2.java	(revision cc7f6e84ed11ac94efc371e8243efc0092bbafaa)
++++ b/src/com/game/gui/GameMenu_2.java	(date 1744085730982)
+@@ -1,8 +1,10 @@
+ package com.game.gui;
+ 
++import javafx.fxml.FXMLLoader;
+ import javafx.geometry.Insets;
+ import javafx.geometry.Pos;
+ import javafx.scene.Scene;
++import javafx.scene.control.Alert;
+ import javafx.scene.control.Button;
+ import javafx.scene.control.Label;
+ import javafx.scene.effect.DropShadow;
+@@ -18,264 +20,259 @@
+ 
+ import java.util.concurrent.atomic.AtomicReference;
+ 
+-import static com.game.gui.UIUtils.launchFeature;
+-
++/**
++ * GameMenu_2 class creates the main game selection menu for the OMG Platform.
++ * It displays game cards for Tic Tac Toe, Checkers, and Connect 4, allowing users to choose a game
++ * and select a match type (Local, Casual Online, or Ranked) via a dialog.
++ */
+ public class GameMenu_2 {
+ 
+-    private Scene loginScene; // Store the LoginWindow scene for back navigation
++    // Field to store the login scene for potential back navigation (currently unused).
++    private Scene loginScene;
+ 
++    /**
++     * Creates the main scene for the game menu.
++     * @param stage The primary stage where this scene will be displayed.
++     * @return A Scene object containing the full menu layout.
++     */
+     public Scene createScene(Stage stage) {
+-        /**
+-         * Creates the main scene layout for the user profile.
+-         * @param stage The stage to which this scene belongs.
+-         * @return A configured Scene with all components.
+-         */
+-
+-        // Main container using BorderPane for top, center, bottom sections
++        // Use BorderPane as the root layout to organize content into top, center, and bottom sections.
+         BorderPane root = new BorderPane();
+-        root.setStyle("-fx-background-color: #F5F5F5;");
++        root.setStyle("-fx-background-color: #F5F5F5;"); // Light gray background for the entire menu.
+ 
+-        root.setTop(UIUtils.createTopBar(stage));
+-        root.setCenter(createCenterContent(stage));
+-        root.setBottom(UIUtils.createFooter());
++        // Set the top, center, and bottom sections using utility methods and custom content.
++        root.setTop(UIUtils.createTopBar(stage));    // Top bar (e.g., title, navigation) from UIUtils.
++        root.setCenter(createCenterContent(stage));  // Main content with game cards.
++        root.setBottom(UIUtils.createFooter());      // Footer (e.g., copyright) from UIUtils.
+ 
++        // Wrap the BorderPane in a StackPane to allow overlays (e.g., dialogs) later.
+         StackPane stackRoot = new StackPane(root);
+-        return new Scene(stackRoot, 1000, 700);
++        return new Scene(stackRoot, 1000, 700); // Return a 1000x700 pixel scene.
+     }
+ 
++    /**
++     * Builds the central content of the menu, including welcome text and game cards.
++     * @param stage The stage for event handling and navigation.
++     * @return A VBox containing the welcome message, subheading, and game cards.
++     */
+     private VBox createCenterContent(Stage stage) {
+-        // ============ CENTER CONTENT ============
+-        VBox centerBox = new VBox(25);
+-        centerBox.setAlignment(Pos.TOP_LEFT);
+-        centerBox.setPadding(new Insets(40, 30, 30, 30));
++        // Vertical box to stack welcome text, subheading, and game cards vertically.
++        VBox centerBox = new VBox(25); // 25px spacing between children.
++        centerBox.setAlignment(Pos.TOP_LEFT); // Align content to the top-left.
++        centerBox.setPadding(new Insets(40, 30, 30, 30)); // Padding: 40px top, 30px right/left/bottom.
+ 
+-        // Welcome section
++        // Welcome label with hardcoded username (to be replaced with actual user data later).
+         Label welcomeLabel = new Label("Welcome back, Player123!");
+-        welcomeLabel.setFont(Font.font("Arial", 28));
+-        welcomeLabel.setStyle("-fx-font-weight: bold;");
++        welcomeLabel.setFont(Font.font("Arial", 28)); // Arial font, 28px size.
++        welcomeLabel.setStyle("-fx-font-weight: bold;"); // Bold text.
+ 
++        // Subheading to guide the user.
+         Label subHeading = new Label("Choose your next game adventure");
+-        subHeading.setFont(Font.font("Arial", 16));
+-        subHeading.setStyle("-fx-text-fill: #666666;");
++        subHeading.setFont(Font.font("Arial", 16)); // Arial font, 16px size.
++        subHeading.setStyle("-fx-text-fill: #666666;"); // Medium gray text color.
+ 
+-        // Game cards container
+-        HBox cardsContainer = new HBox(20);
+-        cardsContainer.setAlignment(Pos.CENTER_LEFT);
+-        cardsContainer.setPadding(new Insets(20, 0, 20, 0));
++        // Horizontal box to hold game cards side by side.
++        HBox cardsContainer = new HBox(20); // 20px spacing between cards.
++        cardsContainer.setAlignment(Pos.CENTER_LEFT); // Center-align cards horizontally, starting from the left.
++        cardsContainer.setPadding(new Insets(20, 0, 20, 0)); // 20px padding top/bottom, 0px left/right.
+ 
+-        // Create each game card
++        // Create game cards for each supported game, passing the stage for navigation.
+         VBox ticTacToeCard = createGameCard("tic_tac_toe_assets/tictactoe_images/tictactoe_icon.png", "Tic Tac Toe",
+                 "Quick matches of X's and O's with friends.", stage);
+-
+         VBox checkersCard = createGameCard("checkers_assets/checkers_images/checkers_icon.png", "Checkers",
+                 "Strategic board game for two players.", stage);
+-
+         VBox connectFourCard = createGameCard("connect4_assets/connect4_icon.png", "Connect 4",
+                 "Line up four in a row to claim victory.", stage);
+ 
+-        // Add all cards to the HBox
++        // Add all game cards to the container.
+         cardsContainer.getChildren().addAll(ticTacToeCard, checkersCard, connectFourCard);
+ 
+-        // Stats section
+-        HBox statsContainer = new HBox(20);
+-        statsContainer.setAlignment(Pos.CENTER);
+-        statsContainer.setPadding(new Insets(15, 0, 15, 0));
+-
+-        // Create stat cards
+-//        VBox winsCard = createStatCard("Total Wins", "127", "trophy_icon.png");
+-//        VBox rankingCard = createStatCard("Ranking", "#234", "star_icon.png");
+-//        VBox friendsCard = createStatCard("Friends Online", "12", "friends_icon.png");
++        // Placeholder for stats (e.g., wins, ranking), currently empty but structured for future use.
++        HBox statsContainer = new HBox(20); // 20px spacing between future stat cards.
++        statsContainer.setAlignment(Pos.CENTER); // Center-align stats horizontally.
++        statsContainer.setPadding(new Insets(15, 0, 15, 0)); // 15px padding top/bottom.
+ 
+-//        statsContainer.getChildren().addAll(winsCard, rankingCard, friendsCard);
+-
+-        // Combine all sections into the center box
++        // Add all elements to the center box in order.
+         centerBox.getChildren().addAll(welcomeLabel, subHeading, cardsContainer, statsContainer);
+-
+         return centerBox;
+     }
+ 
+-    private Button createStyledButton(String text, String baseColor) {
+-        Button button = new Button(text);
+-        button.setFont(Font.font("Arial", 20));
+-        button.setPrefSize(250, 60);
+-        button.setTextFill(Color.WHITE);
+-        button.setStyle(
+-                "-fx-background-color: " + baseColor + ";" +
+-                        "-fx-background-radius: 15;" +
+-                        "-fx-border-radius: 15;"
+-        );
+-        button.setEffect(new DropShadow(3, Color.GRAY));
+-
+-        button.setOnMouseEntered(e -> button.setStyle(
+-                "-fx-background-color: derive(" + baseColor + ", 20%);" +
+-                        "-fx-background-radius: 15;" +
+-                        "-fx-border-radius: 15;"
+-        ));
+-        button.setOnMouseExited(e -> button.setStyle(
+-                "-fx-background-color: " + baseColor + ";" +
+-                        "-fx-background-radius: 15;" +
+-                        "-fx-border-radius: 15;"
+-        ));
+-
+-        return button;
+-    }
+-
+-    private void launchLobby(String gameName, Stage stage) {
+-        try {
+-            // Create an instance of the common GameLobby.
+-            // You can pass the username or other shared info to its constructor if needed.
+-            GameLobby lobby = new GameLobby("User_name", stage);
+-
+-            // Dynamically update the lobby title to match the selected game.
+-            lobby.setGameName(gameName);
+-
+-            // Create a new stage for the lobby and set the scene.
+-            Stage lobbyStage = new Stage();
+-            Scene scene = new Scene(lobby, 950, 620);
+-            lobbyStage.setScene(scene);
+-
+-            // Optionally update the window title to reflect the current game.
+-            lobbyStage.setTitle(gameName + " Lobby");
+-            lobbyStage.show();
+-
+-            // Close the menu stage after launching the lobby.
+-            stage.close();
+-        } catch (Exception e) {
+-            System.out.println("Error launching " + gameName + ": " + e.getMessage());
+-        }
+-    }
+-
+-    private Button createImageButton(String imagePath, String featureName, Stage stage) {
+-        // Load the image
+-        Image image = new Image(GameMenu_2.class.getResource(imagePath).toExternalForm());
+-        ImageView imageView = new ImageView(image);
+-        imageView.setFitWidth(40); // Adjust size as needed
+-        imageView.setFitHeight(40); // Adjust size as needed
+-        imageView.setPreserveRatio(true);
+-
+-        // Create button with image
+-        Button button = new Button();
+-        button.setGraphic(imageView);
+-        button.setPrefSize(80, 80); // Slightly larger than image for padding
+-        button.setStyle(
+-                "-fx-background-color: transparent;" + // No background
+-                        "-fx-background-radius: 15;" +
+-                        "-fx-border-radius: 15;"
+-        );
+-        button.setEffect(new DropShadow(3, Color.GRAY));
+-
+-        // Hover effect (slight scale increase)
+-        button.setOnMouseEntered(e -> {
+-            imageView.setScaleX(1.1);
+-            imageView.setScaleY(1.1);
+-        });
+-        button.setOnMouseExited(e -> {
+-            imageView.setScaleX(1.0);
+-            imageView.setScaleY(1.0);
+-        });
+-
+-        // Action to launch feature
+-        button.setOnAction(e -> launchFeature(featureName, stage));
+-        return button;
+-    }
+-
++    /**
++     * Creates a visual card for a game, including an icon, title, description, and play button.
++     * @param iconPath Path to the game’s icon resource.
++     * @param gameTitle Title of the game (e.g., "Connect 4").
++     * @param description Short description of the game.
++     * @param stage Stage for launching the game or dialog.
++     * @return A VBox representing the game card.
++     */
+     private VBox createGameCard(String iconPath, String gameTitle, String description, Stage stage) {
+-        VBox card = new VBox(15);
+-        card.setAlignment(Pos.TOP_LEFT);
+-        card.setPrefWidth(300);
+-        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);");
++        // Vertical box for the game card layout.
++        VBox card = new VBox(15); // 15px spacing between card elements.
++        card.setAlignment(Pos.TOP_LEFT); // Align content to the top-left.
++        card.setPrefWidth(300); // Fixed width of 300px for consistency.
++        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; " +
++                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);"); // White background, rounded corners, subtle shadow.
+ 
+-        // Game icon/image
++        // Load and display the game icon.
+         ImageView gameIcon = new ImageView(new Image(getClass().getResourceAsStream("/" + iconPath)));
+-        StackPane iconContainer = new StackPane();
++        StackPane iconContainer = new StackPane(); // StackPane to center the icon.
+         iconContainer.getChildren().add(gameIcon);
+-        iconContainer.setPrefHeight(150);
+-        iconContainer.setStyle("-fx-background-color: black; -fx-background-radius: 10 10 0 0;");
++        iconContainer.setPrefHeight(150); // Fixed height for the icon area.
++        iconContainer.setStyle("-fx-background-color: black; -fx-background-radius: 10 10 0 0;"); // Black background, rounded top corners.
++        gameIcon.setFitHeight(80); // Scale icon to 80px height.
++        gameIcon.setFitWidth(80);  // Scale icon to 80px width.
++        gameIcon.setPreserveRatio(true); // Maintain aspect ratio during scaling.
+ 
+-        // Make the icon centered and reasonable size
+-        gameIcon.setFitHeight(80);
+-        gameIcon.setFitWidth(80);
+-        gameIcon.setPreserveRatio(true);
++        // Container for text and button below the icon.
++        VBox textContent = new VBox(8); // 8px spacing between text elements.
++        textContent.setPadding(new Insets(15, 15, 15, 15)); // 15px padding on all sides.
+ 
+-        // Title & Description in VBox
+-        VBox textContent = new VBox(8);
+-        textContent.setPadding(new Insets(15, 15, 15, 15));
+-
++        // Game title label.
+         Label titleLabel = new Label(gameTitle);
+-        titleLabel.setFont(Font.font("Arial", 20));
+-        titleLabel.setStyle("-fx-font-weight: bold;");
++        titleLabel.setFont(Font.font("Arial", 20)); // Arial font, 20px size.
++        titleLabel.setStyle("-fx-font-weight: bold;"); // Bold text.
+ 
++        // Game description label.
+         Label descLabel = new Label(description);
+-        descLabel.setFont(Font.font("Arial", 14));
+-        descLabel.setStyle("-fx-text-fill: #666666;");
+-        descLabel.setWrapText(true);
++        descLabel.setFont(Font.font("Arial", 14)); // Arial font, 14px size.
++        descLabel.setStyle("-fx-text-fill: #666666;"); // Medium gray text.
++        descLabel.setWrapText(true); // Wrap text if it exceeds the card width.
+ 
+-        // Play Now button
++        // "Play Now" button to trigger game mode selection.
+         Button playNowBtn = new Button("Play Now");
+-        playNowBtn.setPrefWidth(Double.MAX_VALUE);
+-        playNowBtn.setPadding(new Insets(10, 0, 10, 0));
+-        playNowBtn.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-background-radius: 5;");
++        playNowBtn.setPrefWidth(Double.MAX_VALUE); // Stretch to fill the card width.
++        playNowBtn.setPadding(new Insets(10, 0, 10, 0)); // 10px padding top/bottom.
++        playNowBtn.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-background-radius: 5;"); // Dark gray background, white text, slight rounding.
+ 
+-        // Show popup with game mode options when "Play Now" is clicked
++        // Action handler for the "Play Now" button: opens a dialog to choose match type.
+         playNowBtn.setOnAction(e -> {
+-            StackPane root = (StackPane) stage.getScene().getRoot();
+-
+-            AtomicReference<StackPane> dialogRef = new AtomicReference<>();
++            StackPane root = (StackPane) stage.getScene().getRoot(); // Get the root StackPane to overlay the dialog.
++            AtomicReference<StackPane> dialogRef = new AtomicReference<>(); // Store dialog reference for removal.
++            GameEnums.GameType gameType = getGameType(gameTitle); // Convert title to enum.
++            // Create a dialog with options for Local, Casual Online, Ranked, and Cancel.
+             StackPane dialog = GameLobby_2.createGameModeDialog(
+                     gameTitle,
+-                    () -> System.out.println("Play Local"),
+-                    () -> System.out.println("Invite Friend"),
+-                    () -> System.out.println("Ranked Match"),
+-                    () -> root.getChildren().remove(dialogRef.get())
++                    () -> launchGame(gameType, GameEnums.MatchType.LOCAL, stage),       // Local game option.
++                    () -> launchMatchmaking(gameType, GameEnums.MatchType.CASUAL_ONLINE, stage), // Casual online option.
++                    () -> launchMatchmaking(gameType, GameEnums.MatchType.RANKED, stage), // Ranked option.
++                    () -> root.getChildren().remove(dialogRef.get())                    // Cancel option.
+             );
+-            dialogRef.set(dialog);
+-            root.getChildren().add(dialog);
++            dialogRef.set(dialog); // Store the dialog in the reference.
++            root.getChildren().add(dialog); // Overlay the dialog on the menu.
+         });
+ 
+-        // Add button hover effects
++        // Hover effects for the button: lighten the background on mouse enter/exit.
+         playNowBtn.setOnMouseEntered(e ->
+                 playNowBtn.setStyle("-fx-background-color: #555555; -fx-text-fill: white; -fx-background-radius: 5;"));
+         playNowBtn.setOnMouseExited(e ->
+                 playNowBtn.setStyle("-fx-background-color: #333333; -fx-text-fill: white; -fx-background-radius: 5;"));
+ 
++        // Add title, description, and button to the text content container.
+         textContent.getChildren().addAll(titleLabel, descLabel, playNowBtn);
+-
+-        // Add all elements into the card
++        // Add icon container and text content to the card.
+         card.getChildren().addAll(iconContainer, textContent);
+-
+         return card;
+     }
+ 
+-    private VBox createStatCard(String statName, String statValue, String iconPath) {
+-        VBox statCard = new VBox(15);
+-        statCard.setAlignment(Pos.CENTER_LEFT);
+-        statCard.setPadding(new Insets(20, 30, 20, 20));
+-        statCard.setPrefWidth(300);
+-        statCard.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);");
++    /**
++     * Maps a game title to its corresponding GameType enum.
++     * @param gameTitle The title of the game (e.g., "Connect 4").
++     * @return The matching GameEnums.GameType value.
++     * @throws IllegalArgumentException if the title is unrecognized.
++     */
++    private GameEnums.GameType getGameType(String gameTitle) {
++        switch (gameTitle) {
++            case "Connect Four":
++                return GameEnums.GameType.CONNECT_FOUR;
++            case "Tic Tac Toe":
++                return GameEnums.GameType.TIC_TAC_TOE;
++            case "Checkers":
++                return GameEnums.GameType.CHECKERS;
++            default:
++                throw new IllegalArgumentException("Unknown game title: " + gameTitle); // Error for invalid titles.
++        }
++    }
+ 
+-        HBox contentBox = new HBox(15);
+-        contentBox.setAlignment(Pos.CENTER_LEFT);
++    /**
++     * Launches a game directly in Local mode with default player names.
++     * @param gameType The type of game to launch.
++     * @param matchType The match type (e.g., LOCAL).
++     * @param stage The current stage to close after launching the game.
++     */
++    private void launchGame(GameEnums.GameType gameType, GameEnums.MatchType matchType, Stage stage) {
++        launchGameScreen(gameType, matchType, "Player 1", "Player 2", stage); // Use default names for local play.
++    }
+ 
+-        // Stat icon
+-        ImageView statIcon = new ImageView(new Image(getClass().getResourceAsStream("/" + iconPath)));
+-        statIcon.setFitHeight(24);
+-        statIcon.setFitWidth(24);
++    /**
++     * Simulates matchmaking by launching a game with a placeholder opponent name.
++     * @param gameType The type of game to launch.
++     * @param matchType The match type (e.g., CASUAL_ONLINE or RANKED).
++     * @param stage The current stage to close after launching.
++     */
++    private void launchMatchmaking(GameEnums.GameType gameType, GameEnums.MatchType matchType, Stage stage) {
+ 
+-        VBox textBox = new VBox(5);
++        // Choose opponent name based on match type (placeholder until real matchmaking is implemented).
++        String opponent = matchType == GameEnums.MatchType.CASUAL_ONLINE ? "Friend" : "Opponent";
++        launchGameScreen(gameType, matchType, "Player", opponent, stage);
++    }
+ 
+-        Label nameLabel = new Label(statName);
+-        nameLabel.setFont(Font.font("Arial", 14));
+-        nameLabel.setStyle("-fx-text-fill: #666666;");
++    /**
++     * Launches the game screen for the selected game and match type.
++     * @param gameType The type of game (e.g., CONNECT_FOUR).
++     * @param matchType The match type (e.g., LOCAL, CASUAL_ONLINE, RANKED).
++     * @param player1 Name of the first player.
++     * @param player2 Name of the second player or opponent.
++     * @param stage The current stage to close after launching the new game stage.
++     */
++    private void launchGameScreen(GameEnums.GameType gameType, GameEnums.MatchType matchType, String player1, String player2, Stage stage) {
++        try {
++            // Determine the FXML file path based on the game type.
++            String fxmlPath;
++            switch (gameType) {
++                case CONNECT_FOUR:
++                    fxmlPath = "/connect4_assets/Connect4Screen.fxml";
++                    break;
++                case TIC_TAC_TOE:
++                    fxmlPath = "/tictactoe_assets/TicTacToeScreen.fxml";
++                    break;
++                case CHECKERS:
++                    fxmlPath = "/checkers_assets/CheckersScreen.fxml";
++                    break;
++                default:
++                    throw new IllegalArgumentException("Unknown game type: " + gameType); // Error for invalid game types.
++            }
+ 
+-        Label valueLabel = new Label(statValue);
+-        valueLabel.setFont(Font.font("Arial", 22));
+-        valueLabel.setStyle("-fx-font-weight: bold;");
++            // Load the FXML file and create a new scene.
++            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
++            Scene scene = new Scene(loader.load(), 1440, 1024); // 1440x1024 resolution for game screens.
++            Stage gameStage = new Stage(); // New stage for the game window.
++            gameStage.setScene(scene);
++            gameStage.setTitle(gameType.toString().replace('_', ' ')); // Set window title (e.g., "Connect Four").
++            gameStage.setResizable(false); // Prevent resizing to maintain layout.
+ 
+-        textBox.getChildren().addAll(valueLabel, nameLabel);
+-        contentBox.getChildren().addAll(statIcon, textBox);
+-
+-        statCard.getChildren().add(contentBox);
++            // Get the controller instance from the FXML loader and configure it.
++            Object controller = loader.getController();
++            if (controller instanceof ConnectFourController) {
++                ConnectFourController cfc = (ConnectFourController) controller;
++                cfc.setMatchType(matchType); // Set the match type (affects UI and logic).
++                cfc.setPlayerNames(player1, player2); // Set player names for display and game logic.
++            }
++            // TODO: Add instanceof checks for TicTacToeController and CheckersController when implemented.
+ 
+-        return statCard;
++            // Show the game window and close the menu.
++            gameStage.show();
++            stage.close();
++        } catch (Exception e) {
++            // Handle any errors (e.g., missing FXML file, loading failure).
++            e.printStackTrace();
++            Alert alert = new Alert(Alert.AlertType.ERROR);
++            alert.setTitle("Error");
++            alert.setHeaderText("Failed to Launch Game");
++            alert.setContentText("Error: " + e.getMessage());
++            alert.showAndWait(); // Display error to the user.
++        }
+     }
++
++    // Note: Unused methods (createStyledButton, launchLobby, createImageButton) were removed for clarity.
++    // They can be re-added if needed for additional features (e.g., custom buttons or lobby screens).
+ }
+\ No newline at end of file

@@ -1,0 +1,11 @@
+[ {
+  "username" : "user",
+  "passwordHash" : "lsBYgo1n1E9CzI/4YcdQ9QNBNv8BKmBCRTOu41I00Bs=:wRQJ/zWRlITAJsgh4ykvug==",
+  "email" : "user@demo.com",
+  "role" : "user",
+  "twoFactorCode" : "439024",
+  "avatarUrl" : null,
+  "suspended" : false,
+  "lockOut" : false,
+  "rememberMe" : false
+} ]

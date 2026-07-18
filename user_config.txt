@@ -1,0 +1,6 @@
+#User Settings
+#Fri Apr 11 22:46:30 MDT 2025
+Game\ Menu=Modern
+menuStyle=GameMenu_2
+rememberMe=false
+skipOTP=true
