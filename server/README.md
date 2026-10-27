@@ -170,20 +170,36 @@ explain what the client saw) rather than to claim a capacity.
 
 ## Running it
 
+Everything (matchmaker, Postgres, Prometheus on localhost:9090, Grafana on localhost:3000):
+
 ```bash
-# Everything: matchmaker + Postgres + Prometheus (localhost:9090) + Grafana (localhost:3000)
 cd server
 docker compose up -d --build --wait
-docker compose --profile load run --rm k6                 # 100 players/s for 2 minutes
+```
+
+Load test at 100 players/s for 2 minutes, then at 300:
+
+```bash
+docker compose --profile load run --rm k6
 docker compose --profile load run --rm -e RATE=300 k6
+```
 
-# Just the service (in-memory store if DATABASE_URL is unset)
-mvn -B package && java -jar target/omg-matchmaking-server.jar
+Just the service, with an in-memory store when `DATABASE_URL` is unset (needs Java 21 and Maven):
 
-# Tests; the Postgres ones run when TEST_DATABASE_URL points at a database they may wipe
+```bash
+mvn -B package
+java -jar target/omg-matchmaking-server.jar
+```
+
+Tests. The Postgres ones run when `TEST_DATABASE_URL` points at a database they may wipe:
+
+```bash
 TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/omg_test mvn -B verify
+```
 
-# Kubernetes (create the matchmaker-db Secret first, see k8s/secret.example.yaml)
+Kubernetes (create the `matchmaker-db` Secret first, see `k8s/secret.example.yaml`):
+
+```bash
 kubectl apply -k k8s
 ```
 

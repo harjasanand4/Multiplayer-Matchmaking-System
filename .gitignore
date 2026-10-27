@@ -8,3 +8,5 @@ ACCESS-TOKEN.p12
 # matchmaking server
 /server/target/
 /server/load/results/
+__pycache__/
+.DS_Store
