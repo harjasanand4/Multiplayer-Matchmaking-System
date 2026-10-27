@@ -15,7 +15,10 @@ public class EloSystem{
      */
     private static double probability(int rA, int rB)
     {
-        return 1.0 / ((1 + Math.pow(10.0, rA - rB) / 400.0));
+        // Expected score of A: 1 / (1 + 10^((rB - rA) / 400)). The exponent must be the rating
+        // difference divided by 400; the earlier version raised 10 to the raw difference, which
+        // made a 100-point favourite's win probability effectively zero.
+        return 1.0 / (1.0 + Math.pow(10.0, (rB - rA) / 400.0));
     }
 
     /**
@@ -30,6 +33,6 @@ public class EloSystem{
     {
         double winProb = probability(ratingA, ratingB);
         double updatedRating = ratingA + constant*(winVar - winProb);
-        return (int) updatedRating;
+        return (int) Math.round(updatedRating);
     }
 }

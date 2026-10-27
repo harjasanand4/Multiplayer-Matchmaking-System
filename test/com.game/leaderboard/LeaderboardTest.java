@@ -302,9 +302,9 @@ public class LeaderboardTest {
             assertTrue(e.getMessage().contains("Unknown game"), "Exception message should indicate unknown game for tictactoe");
         }
 
-        // For setting Elo for tictactoe, production code throws an exception.
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> player.setElo("tictactoe", 850));
-        assertTrue(exception.getMessage().contains("Unknown game"), "Setting Tic Tac Toe Elo should trigger unknown game exception");
+        // Setting the Tic Tac Toe Elo used to throw "Unknown game" (case mismatch in EloRatings.setElo).
+        player.setElo("tictactoe", 850);
+        assertEquals(850, player.getElo("tictactoe"), "Tic Tac Toe Elo should be updated");
 
         // Test wins retrieval and incrementation for a valid game.
         int initialWins = player.getWins("connect4");

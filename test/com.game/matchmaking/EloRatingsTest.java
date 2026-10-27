@@ -23,16 +23,16 @@ class EloRatingsTest {
     }
 
     @Test
-    void testSetEloWithTicTacToeInvalid() {
+    void testSetEloTicTacToeAnyCase() {
         EloRatings ratings = new EloRatings(1000, 1100, 1200);
 
-        // Because setElo uses game.toLowerCase() in the switch,
-        // passing "ticTacToe" will be converted to "tictactoe" and not match the case label "ticTacToe",
-        // causing it to throw an exception.
-        Exception ex = assertThrows(IllegalArgumentException.class, () -> ratings.setElo("ticTacToe", 1050));
-        assertTrue(ex.getMessage().contains("Unknown game"));
+        // setElo lower-cases its key, so the case labels must be lower case too. This used to
+        // throw for "ticTacToe" (the label was "ticTacToe"), so Tic-Tac-Toe ratings could never be saved.
+        ratings.setElo("ticTacToe", 1050);
+        assertEquals(1050, ratings.getElo("tictactoe"));
+        ratings.setElo("TICTACTOE", 1060);
+        assertEquals(1060, ratings.getElo("ticTacToe"));
 
-        // These cases work since "checkers" and "connect4" are already lowercase.
         ratings.setElo("checkers", 1150);
         assertEquals(1150, ratings.getElo("checkers"));
 

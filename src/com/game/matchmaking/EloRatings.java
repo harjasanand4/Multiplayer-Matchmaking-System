@@ -22,7 +22,7 @@ public class EloRatings {
 
     public void setElo(String game, int value) {
         switch (game.toLowerCase()) {
-            case "ticTacToe" -> ticTacToeElo = value;
+            case "tictactoe" -> ticTacToeElo = value;  // was "ticTacToe", which a lower-cased key never matches
             case "checkers" -> checkersElo = value;
             case "connect4" -> connect4Elo = value;
             default -> throw new IllegalArgumentException("Unknown game: " + game);
