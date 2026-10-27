@@ -1,0 +1,13 @@
+# kubectl apply -k server/k8s     (create the Secret first: see secret.example.yaml)
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: omg
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+images:
+  - name: omg-matchmaker
+    newName: ghcr.io/harjasanand4/omg-matchmaker
+    newTag: "1.0.0"

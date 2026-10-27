@@ -1,0 +1,131 @@
+# Recording rules (precomputed queries for the dashboard and the alerts) and alerts.
+#
+# SLO: 95 % of players who join the queue are matched within 10 seconds, measured over 30 days.
+# A player counts against the SLO if they waited longer than 10 s or their ticket expired.
+# (Cancelled tickets don't count either way: the player chose to leave.)
+
+# One group: rules in a group run in order, so the alerts below always read recording rules
+# computed in the same evaluation (separate groups run independently and can be a step behind).
+groups:
+  - name: matchmaking
+    rules:
+      - record: omg:http_requests:rate1m
+        expr: sum by (route, method, status) (rate(omg_http_requests_total[1m]))
+
+      - record: omg:http_5xx_ratio:rate5m
+        expr: |
+          (sum(rate(omg_http_requests_total{status=~"5.."}[5m])) or vector(0))
+          /
+          clamp_min(sum(rate(omg_http_requests_total[5m])), 1e-9)
+
+      - record: omg:http_request_duration_seconds:p99_5m
+        expr: histogram_quantile(0.99, sum by (route, le) (rate(omg_http_request_duration_seconds_bucket[5m])))
+
+      - record: omg:time_to_match_seconds:p50_5m
+        expr: histogram_quantile(0.50, sum by (game, le) (rate(omg_time_to_match_seconds_bucket[5m])))
+
+      - record: omg:time_to_match_seconds:p95_5m
+        expr: histogram_quantile(0.95, sum by (game, le) (rate(omg_time_to_match_seconds_bucket[5m])))
+
+      # SLI error ratio over several windows, for multi-window burn-rate alerts.
+      - record: omg:slo_errors:ratio_rate5m
+        expr: |
+          1 - (
+            sum(rate(omg_time_to_match_seconds_bucket{le="10"}[5m]))
+            /
+            clamp_min(sum(rate(omg_time_to_match_seconds_count[5m])) + sum(rate(omg_tickets_expired_total[5m])), 1e-9)
+          )
+      - record: omg:slo_errors:ratio_rate30m
+        expr: |
+          1 - (
+            sum(rate(omg_time_to_match_seconds_bucket{le="10"}[30m]))
+            /
+            clamp_min(sum(rate(omg_time_to_match_seconds_count[30m])) + sum(rate(omg_tickets_expired_total[30m])), 1e-9)
+          )
+      - record: omg:slo_errors:ratio_rate1h
+        expr: |
+          1 - (
+            sum(rate(omg_time_to_match_seconds_bucket{le="10"}[1h]))
+            /
+            clamp_min(sum(rate(omg_time_to_match_seconds_count[1h])) + sum(rate(omg_tickets_expired_total[1h])), 1e-9)
+          )
+      - record: omg:slo_errors:ratio_rate6h
+        expr: |
+          1 - (
+            sum(rate(omg_time_to_match_seconds_bucket{le="10"}[6h]))
+            /
+            clamp_min(sum(rate(omg_time_to_match_seconds_count[6h])) + sum(rate(omg_tickets_expired_total[6h])), 1e-9)
+          )
+
+      - alert: MatchmakerDown
+        expr: up{job="matchmaker"} == 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: Matchmaker is not answering scrapes
+          description: Prometheus has not been able to scrape {{ $labels.instance }} for a minute. Players can't join or poll.
+
+      - alert: MatchmakerStalled
+        expr: time() - omg_matchmaker_last_tick_timestamp_seconds > 10
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: Matchmaking loop has stopped
+          description: No matchmaking pass for {{ $value | humanizeDuration }}. The API still answers but nobody gets matched; the liveness probe will restart the pod.
+
+      # Error budget burn (Google SRE workbook, chapter 5). Budget = 5 % over 30 days.
+      # 14.4x burns 2 % of the monthly budget in an hour; 6x burns 5 % in six hours.
+      - alert: MatchmakingSLOFastBurn
+        expr: omg:slo_errors:ratio_rate1h > (14.4 * 0.05) and omg:slo_errors:ratio_rate5m > (14.4 * 0.05)
+        for: 2m
+        labels:
+          severity: page
+        annotations:
+          summary: Players are waiting too long to be matched (fast burn)
+          description: '{{ $value | humanizePercentage }} of players over the last hour waited more than 10 s or timed out.'
+
+      - alert: MatchmakingSLOSlowBurn
+        expr: omg:slo_errors:ratio_rate6h > (6 * 0.05) and omg:slo_errors:ratio_rate30m > (6 * 0.05)
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: Matchmaking SLO budget is burning (slow burn)
+          description: '{{ $value | humanizePercentage }} of players over 6 h waited more than 10 s or timed out.'
+
+      - alert: HighServerErrorRate
+        expr: omg:http_5xx_ratio:rate5m > 0.02
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: More than 2 % of API requests are failing
+          description: '{{ $value | humanizePercentage }} of requests returned 5xx over 5 minutes. Check omg_store_errors_total for database trouble.'
+
+      - alert: SlowApi
+        expr: omg:http_request_duration_seconds:p99_5m{route=~"/v1/.*"} > 0.25
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: 'p99 latency on {{ $labels.route }} is above 250 ms'
+          description: 'p99 is {{ $value | humanizeDuration }}.'
+
+      - alert: MatchPersistFailures
+        expr: increase(omg_match_persist_failures_total[5m]) > 0
+        labels:
+          severity: ticket
+        annotations:
+          summary: Matches are failing to save
+          description: '{{ $value }} matches could not be written to Postgres in 5 minutes (players were put back in the queue).'
+
+      - alert: QueueBacklog
+        expr: omg_queue_depth > 500
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: 'Large {{ $labels.game }} queue'
+          description: '{{ $value }} players have been searching for 10 minutes straight; matchmaking may not be keeping up.'

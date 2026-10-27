@@ -1,5 +1,12 @@
 # OMG – Online Multiplayer Gaming
 
+![ci](https://github.com/harjasanand4/multiplayer-matchmaking-system/actions/workflows/ci.yml/badge.svg)
+
+> **New: [`server/`](server/README.md), a deployable matchmaking backend.** Elo-based queue with a
+> widening search window, PostgreSQL ratings and match history, Prometheus metrics, Grafana
+> dashboard, SLO burn-rate alerts with unit tests, Docker Compose stack, Kubernetes manifests, a
+> k6 load test and GitHub Actions CI. See [server/README.md](server/README.md).
+
 ## Game Objective
 **OMG** is an online multiplayer arcade-style game where players compete in real time. The objective is to connect with friends, join matches, and win rounds through responsive gameplay and strategic decisions. It incorporates authentication, matchmaking, and leaderboard tracking — all in one cohesive JavaFX interface.
 
@@ -50,6 +57,7 @@ src/com/game/
 ```
 
 Other directories:
+- `server/` – Headless matchmaking service (Java 21, PostgreSQL, Prometheus, Docker, k6); see [server/README.md](server/README.md)
 - `test/` – Unit tests
 - `lib/` – External libraries (e.g., SendGrid, JUnit)
 - `resources/` – GUI assets or config files
